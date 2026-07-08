@@ -1,3 +1,5 @@
 *.localstorage
 tester.py
 __pycache__/
+dist/
+localstorage.egg-info/
