@@ -1,0 +1,3 @@
+*.localstorage
+tester.py
+__pycache__/
