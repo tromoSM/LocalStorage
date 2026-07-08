@@ -165,7 +165,7 @@ def CreateLocalstorageFile(path,support_site='not found',support_mail='not found
 {metadata_separator}{metadata_separatorMsg}{metadata_separator*(metadata_separatorChar-(len(metadata_separatorMsg)+len(metadata_separator)))}
             """
             metadata=metadata.strip()
-            new.write(metadata)
+            new.write(metadata+'\n{}')
             return path
 
 def LocalstorageFileExists(path):
