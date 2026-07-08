@@ -51,10 +51,13 @@ def refresh(encoding='utf-8'):
                   if debug:
                       print(er)
                   if SupportInfo:
-                   print(f'LocalStorage file may be corrupted or unreadable'),
-                   print('Support info >')
-                   for key,value in metadata:
+                   print(f'LocalStorage file may be corrupted or unreadable')
+                   if len(metadata)!=0:
+                    print('Support info >')
+                    for key,value in metadata:
                       print(f'   {key}:{value}')
+                   else: 
+                       print('  No support info was provided.')
                   else :
                      raise exceptions.LocalStorageReadError(f'Unable to read localstorage file {currentfile}.\nLocalStorage file may be corrupted.\n{er}')
     else:
