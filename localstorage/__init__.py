@@ -1,6 +1,6 @@
 import os
 import json
-from localstorage import exceptions
+from . import exceptions
 
 localstorage_writer_version='v1.0.0'
 
@@ -12,28 +12,39 @@ SupportInfo=True
 localstorage=loadedjson
 rootidentifierstart='$$ROOT$'
 localdatastart='$$LOCAL$'
-metadata_seperator='-'
-metadata_seperatorChar=44
-metadata_seperatorMsg='END'
-metadata_bgseperatorMsg='>> START LOCALSTORAGE'
+metadata_separator='-'
+metadata_separatorChar=44
+metadata_separatorMsg='END'
+metadata_bgseparatorMsg='>> START LOCALSTORAGE'
 debug=False
 indent=4
+localstorage_file_version='no file selected'
 
-def LocalStorageSettings(support_info=SupportInfo,debugging=debug,json_indent=4):
-   global SupportInfo,debug,indent
+
+def LocalStorageSettings(support_info=SupportInfo,debugging=debug,json_indent=indent,root_identifier_start=rootidentifierstart,local_identifier_start=localdatastart,metadata_separator_character=metadata_separator,metadata_separator_count=metadata_separatorChar,metadata_separator_message=metadata_separatorMsg,metadata_separator_innerMessage=metadata_bgseparatorMsg):
+   '''
+    Modify LocalStorage module settings
+   '''
+   global SupportInfo,debug,indent,metadata_separator,metadata_bgseparatorMsg,metadata_separatorChar,metadata_separatorMsg,rootidentifierstart,localdatastart
    SupportInfo=support_info
    debug=debugging
    indent=json_indent
-   return {"debugging":debug,"support_info":SupportInfo,"indent":indent}
+   metadata_separator=metadata_separator_character
+   metadata_separatorChar=metadata_separator_count
+   metadata_bgseparatorMsg=metadata_separator_innerMessage
+   metadata_separatorMsg=metadata_separator_message
+   localdatastart=local_identifier_start
+   rootidentifierstart=root_identifier_start
+   return {"debugging":debug,"support_info":SupportInfo,"indent":indent,"metadata_separator_character":metadata_separator,"metadata_separator_count":metadata_separatorChar,"metadata_separator_innerMessage":metadata_bgseparatorMsg,"metadata_separator_message":metadata_separatorMsg,"root_identifier_start":rootidentifierstart,"local_identifier_start":localdatastart}
 
 def refresh(encoding='utf-8'):
-    global loadedjson,metadata
+    global loadedjson,metadata,localstorage_file_version
     if os.path.exists(currentfile):
         with open(currentfile,'r',encoding=encoding) as localstorage:
           rawdata=str(localstorage.read())
           alllines=rawdata.splitlines()
           for line in alllines:
-              metadatalist=['$$LOCAL$SUPPORTLINK','$$LOCAL$SUPPORTMAIL','$$LOCAL$IDENTIFIER']
+              metadatalist=[f'{localdatastart.replace('=','')}SUPPORTLINK',f'{localdatastart.replace('=','')}SUPPORTMAIL',f'{localdatastart.replace('=','')}IDENTIFIER']
               if line.startswith('$$LOCAL$') and any(required in line for required in metadatalist):
                   if 'SUPPORTLINK'in line:
                       metadata['supportlink']=line.split('=',2)[1]
@@ -41,12 +52,15 @@ def refresh(encoding='utf-8'):
                       metadata['supportmail']=line.split('=',2)[1]
                   elif 'IDENTIFIER'in line:
                       metadata['name']=line.split('=',2)[1]
+              elif line.startswith(rootidentifierstart):
+                  if 'WRITER' in line:
+                      localstorage_file_version=line.split('=',2)[1]
               else:
                   break
           try:
-                  loadedjson=json.loads(rawdata.split(f'{metadata_seperator}{metadata_seperatorMsg}{metadata_seperator*(metadata_seperatorChar-len(metadata_seperator)-len(metadata_seperatorMsg))}',2)[1])
+                  loadedjson=json.loads(rawdata.split(f'{metadata_separator}{metadata_separatorMsg}{metadata_separator*(metadata_separatorChar-len(metadata_separator)-len(metadata_separatorMsg))}',2)[1])
                   if debug:
-                     print(json.loads(rawdata.split(f'{metadata_seperator}{metadata_seperatorMsg}{metadata_seperator*(metadata_seperatorChar-len(metadata_seperator)-len(metadata_seperatorMsg))}',2)[1]))
+                     print(json.loads(rawdata.split(f'{metadata_separator}{metadata_separatorMsg}{metadata_separator*(metadata_separatorChar-len(metadata_separator)-len(metadata_separatorMsg))}',2)[1]))
           except Exception as er:
                   if debug:
                       print(er)
@@ -57,22 +71,27 @@ def refresh(encoding='utf-8'):
                     for key,value in metadata:
                       print(f'   {key}:{value}')
                    else: 
-                       print('  No support info was provided.')
+                       print('>> No support info was provided.')
                   else :
                      raise exceptions.LocalStorageReadError(f'Unable to read localstorage file {currentfile}.\nLocalStorage file may be corrupted.\n{er}')
     else:
          raise FileNotFoundError
 def load(storage_file_path,encoding='utf-8'):
+    'Load an existing storage file to read'
     global currentfile
     currentfile=os.path.abspath(storage_file_path)
-    refresh()
+    refresh(encoding=encoding)
 
 def getItem(key):
+    '''Get an item from Localstorage
+    \n`getItem` will return None if the key is missing in localstorage
+    '''
     if currentfile==None:
         raise exceptions.LocalStorageNoStorageFileSelected('You must select a localstorage file to use this function\nexample: localstorage.load(example.localstorage)')
     return loadedjson.get(key)
 
 def setItem(key,value,encoding='utf-8'):
+    '''Set a value to an item from Localstorage'''
     if currentfile==None:
         raise exceptions.LocalStorageNoStorageFileSelected('You must select a localstorage file to use this function\nexample: localstorage.load(example.localstorage)')
     global loadedjson
@@ -87,25 +106,40 @@ def setItem(key,value,encoding='utf-8'):
 
         with open(currentfile,'w',encoding=encoding) as storage:
          metadatawr=f"""
-{rootidentifierstart}WRITER={localstorage_writer_version}
+{rootidentifierstart}WRITER=LOCALSTORAGE PY MODULE {localstorage_writer_version}
 {localdatastart}IDENTIFIER={metadata.get('name')}
 {localdatastart}SUPPORTLINK={metadata.get('supportlink')}
 {localdatastart}SUPPORTMAIL={metadata.get('supportmail')}
-{metadata_seperator*metadata_seperatorChar}
-{metadata_bgseperatorMsg}
-{metadata_seperator}{metadata_seperatorMsg}{metadata_seperator*(metadata_seperatorChar-(len(metadata_seperatorMsg)+len(metadata_seperator)))}    """
+{metadata_separator*metadata_separatorChar}
+{metadata_bgseparatorMsg}
+{metadata_separator}{metadata_separatorMsg}{metadata_separator*(metadata_separatorChar-(len(metadata_separatorMsg)+len(metadata_separator)))}    """
          metadatawr=metadatawr.strip()
          storage.write(f'{metadatawr}\n{json.dumps(loadedjson,indent=indent)}')
     except Exception as er:
        print(er)
        raise exceptions.LocalStorageWriteError(f'Unable to write data to localstorage file {currentfile}.\n{er}')
     
-def clear():
+def clear(clearMetadata=False,encoding='utf-8'):
     if currentfile==None:
         raise exceptions.LocalStorageNoStorageFileSelected('You must select a localstorage file to use this function\nexample: localstorage.load(example.localstorage)')
     global loadedjson
     loadedjson.clear()
+    try:
+        if not clearMetadata:
+            with open(currentfile,'r',encoding=encoding) as read:
+                splittr=f'{metadata_separator}{metadata_separatorMsg}{metadata_separator*(metadata_separatorChar-len(metadata_separator)-len(metadata_separatorMsg))}'
+                write=read.read().split(splittr,2)[0]+f'{splittr}\n'+"{ }"
+        else:
+            write=''
 
+        with open(currentfile,'w',encoding=encoding) as wr:
+            wr.write(write)    
+
+    except Exception as er:
+        if debug:
+            print(er)
+        raise exceptions.LocalStorageStorageClearError("Can't clear storage from localstorage file.")
+    
 def removeItem(key):
     if currentfile==None:
         raise exceptions.LocalStorageNoStorageFileSelected('You must select a localstorage file to use this function\nexample: localstorage.load(example.localstorage)')
@@ -126,10 +160,28 @@ def CreateLocalstorageFile(path,support_site='not found',support_mail='not found
 {localdatastart}IDENTIFIER={identifier}
 {localdatastart}SUPPORTLINK={support_site}
 {localdatastart}SUPPORTMAIL={support_mail}
-{metadata_seperator*metadata_seperatorChar}
-{metadata_bgseperatorMsg}
-{metadata_seperator}{metadata_seperatorMsg}{metadata_seperator*(metadata_seperatorChar-(len(metadata_seperatorMsg)+len(metadata_seperator)))}
+{metadata_separator*metadata_separatorChar}
+{metadata_bgseparatorMsg}
+{metadata_separator}{metadata_separatorMsg}{metadata_separator*(metadata_separatorChar-(len(metadata_separatorMsg)+len(metadata_separator)))}
             """
             metadata=metadata.strip()
             new.write(metadata)
             return path
+
+def LocalstorageFileExists(path):
+    """Returns True if Localstorage file already exists"""
+    return os.path.exists(os.path.abspath(path))
+
+#runtimeglobal
+__all__=[
+    "LocalStorageSettings",
+    "load",
+    "getItem",
+    "setItem",
+    "clear",
+    "removeItem",
+    "CreateLocalstorageFile",
+    "localstorage_writer_version",
+    "localstorage_file_version",
+    "LocalstorageFileExists"
+]

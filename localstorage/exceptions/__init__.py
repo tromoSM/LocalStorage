@@ -6,3 +6,5 @@ class LocalStorageWriteError(Exception):
     pass
 class LocalStorageNoStorageFileSelected(Exception):
     pass
+class LocalStorageStorageClearError(Exception):
+    pass
