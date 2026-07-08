@@ -25,6 +25,6 @@ py-modules = ["localstorage"]
 
 
 [project.urls]
-Homepage = https://tromosm.gt.tc/?utm_source=pypiOthr_localstorage#project
-Source = https://github.com/tromoSM/LocalStorage
-"Feedback/requests" = https://tromosm.gt.tc/?utm_source=pypiFeed_localstorage&feedback=true
+Homepage = "https://tromosm.gt.tc/?utm_source=pypiOthr_localstorage#project"
+Source = "https://github.com/tromoSM/LocalStorage"
+"Feedback/requests" = "https://tromosm.gt.tc/?utm_source=pypiFeed_localstorage&feedback=true"
