@@ -65,9 +65,13 @@ def load(storage_file_path,encoding='utf-8'):
     refresh()
 
 def getItem(key):
+    if currentfile==None:
+        raise exceptions.LocalStorageNoStorageFileSelected('You must select a localstorage file to use this function\nexample: localstorage.load(example.localstorage)')
     return loadedjson.get(key)
 
 def setItem(key,value,encoding='utf-8'):
+    if currentfile==None:
+        raise exceptions.LocalStorageNoStorageFileSelected('You must select a localstorage file to use this function\nexample: localstorage.load(example.localstorage)')
     global loadedjson
     loadedjson[key]=value
     try:
@@ -94,10 +98,14 @@ def setItem(key,value,encoding='utf-8'):
        raise exceptions.LocalStorageWriteError(f'Unable to write data to localstorage file {currentfile}.\n{er}')
     
 def clear():
+    if currentfile==None:
+        raise exceptions.LocalStorageNoStorageFileSelected('You must select a localstorage file to use this function\nexample: localstorage.load(example.localstorage)')
     global loadedjson
     loadedjson.clear()
 
 def removeItem(key):
+    if currentfile==None:
+        raise exceptions.LocalStorageNoStorageFileSelected('You must select a localstorage file to use this function\nexample: localstorage.load(example.localstorage)')
     global loadedjson
     try:
      del loadedjson[key]

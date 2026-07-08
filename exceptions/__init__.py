@@ -4,3 +4,5 @@ class LocalStorageFileAlreadyExist(Exception):
     pass
 class LocalStorageWriteError(Exception):
     pass
+class LocalStorageNoStorageFileSelected(Exception):
+    pass
