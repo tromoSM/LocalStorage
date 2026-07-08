@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "localstorage"
-version = "1.0.2"
+version = "1.0.3"
 description = "Localstorage for python with more tools"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -20,9 +20,9 @@ classifiers = [
   "Programming Language :: Python :: 3 :: Only"
 ]
 
-[tool.setuptools]
-packages = ["localstorage"]
-
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["localstorage*"]
 
 [project.urls]
 Homepage = "https://tromosm.gt.tc/?utm_source=pypiOthr_localstorage#project"
