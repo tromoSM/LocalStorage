@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "localstorage"
-version = "1.0.1"
+version = "1.0.2"
 description = "Localstorage for python with more tools"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -21,7 +21,7 @@ classifiers = [
 ]
 
 [tool.setuptools]
-py-modules = ["localstorage"]
+packages = ["localstorage"]
 
 
 [project.urls]
