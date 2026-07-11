@@ -1,5 +1,6 @@
 # LocalStorage 
-### Localstorage for python with more features
+### Localstorage for python with more features 
+[![PyPI Downloads](https://static.pepy.tech/personalized-badge/localstorage?period=monthly&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=downloads%2Fmonth)](https://pepy.tech/projects/localstorage)
 ---
 ## Installation 
 ```bash
